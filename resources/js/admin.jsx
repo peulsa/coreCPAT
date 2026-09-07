@@ -4,11 +4,46 @@ import { createRoot } from 'react-dom/client';
 // --- COMPONENTE PRINCIPAL DEL DASHBOARD ---
 function AdminDashboard() {
     const [currentTab, setCurrentTab] = useState('inicio');
+    const [periodoActivo, setPeriodoActivo] = useState(null);
+    
 
     const [institucionInfo] = useState({
         nombre: 'Erika Alejandra Aristizabal Madrid',
         municipio: 'Municipalidad de Doñihue'
     });
+
+    const [ciclosData, setCiclosData] = useState({ anterior: null, proximos: [] });
+
+    useEffect(() => {
+        // Cargar período activo
+        fetch('/admin/api/periodo-activo')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    setPeriodoActivo(data.data);
+                }
+            })
+            .catch(err => console.error("Error al cargar período activo", err));
+
+        // Cargar resumen de ciclos (anterior y próximos)
+        fetch('/admin/api/resumen-ciclos')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setCiclosData({ anterior: data.anterior, proximos: data.proximos }); // CORREGIDO: setCiclosData
+                }
+            })
+            .catch(err => console.error("Error al cargar ciclos", err));
+    }, []);
+
+    // Formatear fecha para la interfaz (YYYY-MM-DD HH:mm:ss a DD/MM/YYYY HH:mm)
+    const formatearFechaUI = (fechaStr) => {
+        if (!fechaStr) return 'No definido';
+        const [fecha, hora] = fechaStr.split(' ');
+        const [anio, mes, dia] = fecha.split('-');
+        const horaMin = hora ? hora.slice(0, 5) : '';
+        return `${dia}/${mes}/${anio} ${horaMin}`;
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 flex font-sans text-gray-800">
@@ -17,7 +52,7 @@ function AdminDashboard() {
                 <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
                     <div className="bg-white p-2 rounded text-[#0a192f] font-bold text-xl flex items-center justify-center shadow">📋</div>
                     <div>
-                        <span className="font-bold text-lg tracking-wider block leading-tight">cpat</span>
+                        <span className="font-bold text-lg tracking-wider block leading-tight">coreCPAT</span>
                         <span className="text-[10px] text-gray-300 uppercase tracking-wider block mt-1">
                             Catálogo de Procedimientos Administrativos y Tramitaciones
                         </span>
@@ -82,12 +117,6 @@ function AdminDashboard() {
                                 </>
                             )}
                         </div>
-
-                        <div className="flex items-center space-x-2">
-                            <button className="p-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 shadow-xs" title="Contraste">🌗</button>
-                            <button className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-xs">A-</button>
-                            <button className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-xs">A+</button>
-                        </div>
                     </div>
 
                     {/* VISTA: GESTIÓN DE PERÍODOS */}
@@ -111,28 +140,65 @@ function AdminDashboard() {
 
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
                                     <div className="text-sm text-gray-600 mb-1">Fecha del periodo activo</div>
-                                    <div className="text-base font-semibold text-gray-900 mb-4">02/09/2026 12:00 al 30/09/2026 18:30</div>
+                                    <div className="text-base font-semibold text-gray-900 mb-4">
+                                        {periodoActivo 
+                                            ? `${formatearFechaUI(periodoActivo.fecha_inicio)} al ${formatearFechaUI(periodoActivo.fecha_fin)}` 
+                                            : 'No hay períodos activos configurados'}
+                                    </div>
 
                                     <div className="text-sm text-gray-600 mb-1">Estado de la institución</div>
                                     <div className="flex items-center space-x-2 mb-4">
-                                        <span className="w-3 h-3 bg-green-600 rounded-full inline-block"></span>
-                                        <span className="text-base font-semibold text-gray-900">En proceso</span>
+                                        <span className={`w-3 h-3 rounded-full inline-block ${periodoActivo?.estado === 'En proceso' ? 'bg-green-600' : 'bg-gray-400'}`}></span>
+                                        <span className="text-base font-semibold text-gray-900">
+                                            {periodoActivo ? periodoActivo.estado : 'Sin período'}
+                                        </span>
                                     </div>
                                     <div className="border border-green-600 rounded-xl p-4 bg-green-50/30 text-gray-700 text-sm font-medium">
-                                        Puedes ingresar la información de tus procedimientos administrativos y otras tramitaciones
+                                        {periodoActivo?.descripcion || 'Configura un período en la sección de Gestión de Períodos para habilitar el ingreso.'}
                                     </div>
                                 </div>
                             </div>
 
+                            {/* TARJETA EDITADA: GESTIÓN DE CICLOS CON HISTORIAL */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                                 <div className="flex items-center space-x-3 mb-4 pb-4 border-b border-gray-100">
                                     <div className="bg-sky-50 p-2.5 rounded-xl text-xl">📅</div>
                                     <h3 className="text-lg font-bold text-gray-900">Gestión de Ciclos</h3>
                                 </div>
                                 <p className="text-sm text-gray-600 mb-6">Administra los ciclos y períodos anuales de actualización directamente en el sistema.</p>
-                                <button onClick={() => setCurrentTab('periodos')} className="w-full bg-[#1976d2] text-white font-semibold py-3 rounded-xl text-sm hover:bg-[#1565c0] transition-colors">
+                                <button onClick={() => setCurrentTab('periodos')} className="w-full bg-[#1976d2] text-white font-semibold py-3 rounded-xl text-sm hover:bg-[#1565c0] transition-colors mb-6">
                                     Ir a Gestión de Períodos
                                 </button>
+
+                                {/* SECCIÓN: PERÍODO ANTERIOR */}
+                                <div className="mb-6 pt-4 border-t border-gray-100">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Período anterior</h4>
+                                    {ciclosData.anterior ? (
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm">
+                                            <div className="font-semibold text-gray-800">{ciclosData.anterior.titulo}</div>
+                                            <div className="text-xs text-gray-500 mt-1">{ciclosData.anterior.rango_texto}</div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 italic">No hay registros anteriores.</p>
+                                    )}
+                                </div>
+
+                                {/* SECCIÓN: PRÓXIMOS PERIODOS */}
+                                <div>
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Próximos períodos</h4>
+                                    {ciclosData.proximos.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {ciclosData.proximos.map(p => (
+                                                <div key={p.id} className="p-3 bg-sky-50/50 rounded-xl border border-sky-100 text-sm">
+                                                    <div className="font-semibold text-[#1976d2]">{p.titulo}</div>
+                                                    <div className="text-xs text-gray-600 mt-1">{p.rango_texto}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 italic">No hay períodos próximos programados.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -168,7 +234,6 @@ function GestionPeriodos() {
         fetchPeriodos();
     }, []);
 
-    // Función inteligente que autogenera el rango, título y estado a partir de las fechas
     const handleFechaChange = (tipo, valor) => {
         const nuevasFechas = { ...formData, [tipo]: valor };
 
@@ -177,20 +242,17 @@ function GestionPeriodos() {
             const fFin = new Date(nuevasFechas.fecha_fin);
             const ahora = new Date();
 
-            // 1. Autocompletar Rango en texto (Ej: 02/09 al 30/09)
             const diaInicio = String(fInicio.getDate()).padStart(2, '0');
             const mesInicio = String(fInicio.getMonth() + 1).padStart(2, '0');
             const diaFin = String(fFin.getDate()).padStart(2, '0');
             const mesFin = String(fFin.getMonth() + 1).padStart(2, '0');
             nuevasFechas.rango_texto = `${diaInicio}/${mesInicio} al ${diaFin}/${mesFin}`;
 
-            // 2. Autogenerar Título estandarizado (Ej: Actualización de septiembre 2026)
             const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
             const nombreMes = meses[fInicio.getMonth()];
             const anioInicio = fInicio.getFullYear();
             nuevasFechas.titulo = `Actualización de ${nombreMes} ${anioInicio}`;
 
-            // 3. Autocalcular Estado según fechas
             if (ahora < fInicio) {
                 nuevasFechas.estado = 'Próximo';
             } else if (ahora >= fInicio && ahora <= fFin) {
@@ -219,10 +281,20 @@ const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
 
-        // Asegurarnos de limpiar y formatear las fechas para el backend (YYYY-MM-DD HH:mm:ss)
+        // 1. Validaciones manuales en español
+        if (!formData.fecha_inicio || !formData.fecha_fin) {
+            setMessage({ type: 'error', text: 'Por favor, selecciona la fecha y hora de inicio y cierre.' });
+            return;
+        }
+
+        if (!formData.descripcion.trim()) {
+            setMessage({ type: 'error', text: 'Por favor, ingresa una descripción para el período.' });
+            return;
+        }
+
+        // 2. Formatear las fechas para el backend (YYYY-MM-DD HH:mm:ss)
         const formatDateTime = (val) => {
             if (!val) return '';
-            // Si viene con formato de input local, lo adaptamos
             return val.replace('T', ' ');
         };
 
@@ -249,14 +321,15 @@ const handleSubmit = async (e) => {
                 setEditingId(null);
                 fetchPeriodos();
             } else {
-                console.error("Detalle del error:", data);
-                setMessage({ type: 'error', text: 'Verifica los campos del formulario.' });
+                setMessage({ 
+                    type: 'error', 
+                    text: data.message || 'Verifica los campos del formulario.' 
+                });
             }
         } catch (error) {
             setMessage({ type: 'error', text: 'Error de conexión con el servidor.' });
         }
     };
-
     const handleEdit = (p) => {
         setEditingId(p.id);
         setFormData({
@@ -270,7 +343,7 @@ const handleSubmit = async (e) => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('¿Estás segura de eliminar este período?')) return;
+        if (!confirm('¿Estás seguro de eliminar este período?')) return;
 
         try {
             const res = await fetch(`/admin/api/periodos/${id}`, { method: 'DELETE' });
@@ -300,8 +373,7 @@ const handleSubmit = async (e) => {
                         <input 
                             type="datetime-local" 
                             value={formData.fecha_inicio} 
-                            onChange={(e) => handleFechaChange('fecha_inicio', e.target.value)} 
-                            required 
+                            onChange={(e) => handleFechaChange('fecha_inicio', e.target.value)}  
                             className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" 
                         />
                     </div>
@@ -310,8 +382,7 @@ const handleSubmit = async (e) => {
                         <input 
                             type="datetime-local" 
                             value={formData.fecha_fin} 
-                            onChange={(e) => handleFechaChange('fecha_fin', e.target.value)} 
-                            required 
+                            onChange={(e) => handleFechaChange('fecha_fin', e.target.value)}  
                             className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" 
                         />
                     </div>
@@ -339,8 +410,7 @@ const handleSubmit = async (e) => {
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Descripción</label>
                         <textarea 
                             value={formData.descripcion} 
-                            onChange={(e) => setFormData({...formData, descripcion: e.target.value})} 
-                            required 
+                            onChange={(e) => setFormData({...formData, descripcion: e.target.value})}  
                             rows="2" 
                             className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" 
                             placeholder="En este período podrás ajustar tu nómina oficial..."
