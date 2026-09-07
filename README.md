@@ -1,58 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏛️ CoreCPAT - Catálogo de Procedimientos Administrativos y Tramitaciones
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+> Sistema integral de gestión y control institucional desarrollado para optimizar los procesos administrativos, la trazabilidad de trámites y la administración de periodos operativos.
+
+---
+
+## 🚧 Estado del Proyecto
+<p align="left">
+<img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
 </p>
 
-## About Laravel
+Se encuentra implementado el módulo central de administración, el control de períodos con estados dinámicos y la persistencia histórica mediante *Soft Deletes*.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Tabla de Contenidos
+* [Descripción del Proyecto](#-descripción-del-proyecto)
+* [Estado del Proyecto](#-estado-del-proyecto)
+* [Características Principales](#-características-principales)
+* [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+* [Estructura del Proyecto](#-estructura-del-proyecto)
+* [Instalación y Configuración](#-instalación-y-configuración)
+* [Ejecución del Entorno](#-execution-del-entorno)
+* [Licencia](#-licencia)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📝 Descripción del Proyecto
+**CoreCPAT** es una plataforma orientada a la digitalización y el ordenamiento de flujos de trabajo públicos. Permite centralizar la administración de periodos operativos, la gestión de nóminas y el control de procedimientos bajo los lineamientos de transformación digital, ofreciendo una interfaz rápida, intuitiva y robusta.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## :hammer: Funcionalidades del proyecto
 
-## Agentic Development
+- `Gestión de Períodos`: Creación, edición y control de períodos operativos con autocompletado inteligente de rangos y títulos estandarizados.
+- `Cálculo de Estados Automático`: Determinación en tiempo real del estado del período (`Próximo`, `En proceso`, `Finalizado`) basado en la fecha y hora del sistema mediante *Carbon*.
+- `Historial y Soft Deletes`: Preservación de registros históricos y de auditoría institucional en la base de datos sin eliminarlos de forma permanente.
+- `Panel Administrativo Institucional`: Interfaz moderna y responsiva desarrollada con React y Tailwind CSS, adaptada a los lineamientos de la administración pública.
+- `Sincronización Temporal Local`: Configuración estricta de la zona horaria del servidor ajustada a `America/Santiago` para la precisión de las marcas de tiempo.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 🛠️ Tecnologías Utilizadas
+Este proyecto combina un backend sólido con un frontend ágil:
+* **Backend:** PHP, [Laravel 13](https://laravel.com/), Eloquent ORM, SQLite.
+* **Frontend:** React, Vite, Tailwind CSS.
 
-php artisan boost:install
+---
+
+## ⚙️ Configuración y Puesta en Marcha (Entorno Local)
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/peulsa/coreCPAT.git
+   cd coreCPAT
+
+2. **Instalar dependencias:**
+   ```bash
+   composer install
+   npm install
+
+3. **Configurar el entorno:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+
+4. **Ejecutar migraciones:**
+   ```bash
+   php artisan migrate
+
+5. **Levantar servidor:**
+   ```bash
+   php artisan serve
+
+
+---
+
+## 📂 Estructura del Proyecto
+```text
+coreCPAT/
+├── app/
+│   ├── Http\Controllers/
+│   │   ├── AdminPeriodoController.php
+│   │   ├── AdminProcedimientoController.php
+│   │   └── Controller.php
+│   └── Models/
+│       ├── Departamento.php
+│       ├── Periodo.php
+│       ├── Procedimiento.php
+│       └── User.php
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── database.sqlite
+├── resources/
+│   ├── js/
+│   │   ├── admin.jsx
+│   │   └── app.jsx
+│   └── views/
+│       ├── admin.blade.php
+│       └── welcome.blade.php
+├── routes/
+│   └── web.php
+│   └── console.php
+└── vite.config.js
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+![License](https://img.shields.io/badge/license-MIT-green)
+![Laravel](https://img.shields.io/badge/laravel-v13.30.1-red)
+![Release Date](https://img.shields.io/badge/release%20date-september-yellow)
