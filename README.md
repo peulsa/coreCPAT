@@ -14,14 +14,7 @@ Se encuentra implementado el módulo central de administración, el control de p
 ---
 
 ## 📋 Tabla de Contenidos
-* [Descripción del Proyecto](#-descripción-del-proyecto)
-* [Estado del Proyecto](#-estado-del-proyecto)
-* [Características Principales](#-características-principales)
-* [Tecnologías Utilizadas](#-tecnologías-utilizadas)
-* [Estructura del Proyecto](#-estructura-del-proyecto)
-* [Instalación y Configuración](#-instalación-y-configuración)
-* [Ejecución del Entorno](#-execution-del-entorno)
-* [Licencia](#-licencia)
+
 
 ---
 
