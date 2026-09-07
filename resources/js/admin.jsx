@@ -215,15 +215,21 @@ function GestionPeriodos() {
         }
     };
 
-    const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
 
-        // Limpiar formato de fecha para Laravel (reemplazar 'T' por espacio)
+        // Asegurarnos de limpiar y formatear las fechas para el backend (YYYY-MM-DD HH:mm:ss)
+        const formatDateTime = (val) => {
+            if (!val) return '';
+            // Si viene con formato de input local, lo adaptamos
+            return val.replace('T', ' ');
+        };
+
         const payload = {
             ...formData,
-            fecha_inicio: formData.fecha_inicio.replace('T', ' '),
-            fecha_fin: formData.fecha_fin.replace('T', ' ')
+            fecha_inicio: formatDateTime(formData.fecha_inicio),
+            fecha_fin: formatDateTime(formData.fecha_fin)
         };
 
         const url = editingId ? `/admin/api/periodos/${editingId}` : '/admin/api/periodos';
@@ -243,7 +249,7 @@ function GestionPeriodos() {
                 setEditingId(null);
                 fetchPeriodos();
             } else {
-                console.error("Errores de validación:", data.errors);
+                console.error("Detalle del error:", data);
                 setMessage({ type: 'error', text: 'Verifica los campos del formulario.' });
             }
         } catch (error) {

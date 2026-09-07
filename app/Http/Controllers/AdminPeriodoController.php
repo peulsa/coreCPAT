@@ -4,11 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\Periodo;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AdminPeriodoController extends Controller
 {
     public function index()
     {
+        // Opcional: puedes actualizar los estados dinámicamente al listar si ya expiraron
+        $periodos = Periodo::orderBy('fecha_inicio', 'asc')->get();
+        
+        foreach ($periodos as $p) {
+            $now = Carbon::now();
+            $inicio = Carbon::parse($p->fecha_inicio);
+            $fin = Carbon::parse($p->fecha_fin);
+
+            $nuevoEstado = $p->estado;
+            if ($now->lt($inicio)) {
+                $nuevoEstado = 'Próximo';
+            } elseif ($now->between($inicio, $fin)) {
+                $nuevoEstado = 'En proceso';
+            } else {
+                $nuevoEstado = 'Finalizado';
+            }
+
+            if ($p->estado !== $nuevoEstado) {
+                $p->update(['estado' => $nuevoEstado]);
+            }
+        }
+
         return Periodo::orderBy('fecha_inicio', 'asc')->get();
     }
 
@@ -16,8 +39,8 @@ class AdminPeriodoController extends Controller
     {
         $validated = $request->validate([
             'rango_texto' => 'required|string',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date',
+            'fecha_inicio' => 'required',
+            'fecha_fin' => 'required',
             'titulo' => 'required|string',
             'descripcion' => 'required|string',
             'estado' => 'required|string',
@@ -35,8 +58,8 @@ class AdminPeriodoController extends Controller
     {
         $validated = $request->validate([
             'rango_texto' => 'required|string',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date',
+            'fecha_inicio' => 'required',
+            'fecha_fin' => 'required',
             'titulo' => 'required|string',
             'descripcion' => 'required|string',
             'estado' => 'required|string',
@@ -53,10 +76,13 @@ class AdminPeriodoController extends Controller
 
     public function destroy(Periodo $periodo)
     {
+        // Al tener SoftDeletes, esto llenará el campo 'deleted_at' 
+        // sin borrar el registro de la BD, manteniendo el historial a salvo.
         $periodo->delete();
+
         return response()->json([
             'success' => true, 
-            'message' => 'Período eliminado con éxito'
+            'message' => 'Período enviado al historial con éxito'
         ]);
     }
 }
