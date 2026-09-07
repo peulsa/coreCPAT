@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Periodo;
+use App\Models\PeriodoHistorico;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -10,7 +11,6 @@ class AdminPeriodoController extends Controller
 {
     public function index()
     {
-        // Opcional: puedes actualizar los estados dinámicamente al listar si ya expiraron
         $periodos = Periodo::orderBy('fecha_inicio', 'asc')->get();
         
         foreach ($periodos as $p) {
@@ -47,6 +47,19 @@ class AdminPeriodoController extends Controller
         ]);
 
         $periodo = Periodo::create($validated);
+
+        // Guardar la versión inicial de creación
+        PeriodoHistorico::create([
+            'periodo_id' => $periodo->id,
+            'rango_texto' => $periodo->rango_texto,
+            'fecha_inicio' => $periodo->fecha_inicio,
+            'fecha_fin' => $periodo->fecha_fin,
+            'titulo' => $periodo->titulo,
+            'descripcion' => $periodo->descripcion,
+            'estado' => $periodo->estado,
+            'accion' => 'creado'
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Período guardado con éxito',
@@ -65,8 +78,21 @@ class AdminPeriodoController extends Controller
             'estado' => 'required|string',
         ]);
 
+        // 1. Guardar los datos anteriores en el histórico antes de modificarlos
+        PeriodoHistorico::create([
+            'periodo_id' => $periodo->id,
+            'rango_texto' => $periodo->rango_texto,
+            'fecha_inicio' => $periodo->fecha_inicio,
+            'fecha_fin' => $periodo->fecha_fin,
+            'titulo' => $periodo->titulo,
+            'descripcion' => $periodo->descripcion,
+            'estado' => $periodo->estado,
+            'accion' => 'actualizado'
+        ]);
+
+        // 2. Aplicar los nuevos cambios en la tabla principal
         $periodo->update($validated);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Período actualizado con éxito',
@@ -76,13 +102,24 @@ class AdminPeriodoController extends Controller
 
     public function destroy(Periodo $periodo)
     {
-        // Al tener SoftDeletes, esto llenará el campo 'deleted_at' 
-        // sin borrar el registro de la BD, manteniendo el historial a salvo.
+        // 1. Registrar la última versión vigente en el histórico antes de eliminarlo
+        PeriodoHistorico::create([
+            'periodo_id' => $periodo->id,
+            'rango_texto' => $periodo->rango_texto,
+            'fecha_inicio' => $periodo->fecha_inicio,
+            'fecha_fin' => $periodo->fecha_fin,
+            'titulo' => $periodo->titulo,
+            'descripcion' => $periodo->descripcion,
+            'estado' => $periodo->estado,
+            'accion' => 'eliminado'
+        ]);
+
+        // 2. Ejecutar la eliminación (Soft Delete)
         $periodo->delete();
 
         return response()->json([
             'success' => true, 
-            'message' => 'Período enviado al historial con éxito'
+            'message' => 'Período eliminado y registrado en el historial con éxito'
         ]);
     }
 }

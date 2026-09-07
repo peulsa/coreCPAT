@@ -4,26 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Periodo extends Model
+class PeriodoHistorico extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    protected $table = 'periodos';
+    protected $table = 'periodo_historicos';
 
     protected $fillable = [
+        'periodo_id',
         'rango_texto',
         'fecha_inicio',
         'fecha_fin',
         'titulo',
         'descripcion',
-        'estado'
+        'estado',
+        'accion'
     ];
 
-    // Relación con el historial
-    public function historicos()
+    public function periodo()
     {
-        return $this->hasMany(PeriodoHistorico::class);
+        return $this->belongsTo(Periodo::class);
     }
 }
