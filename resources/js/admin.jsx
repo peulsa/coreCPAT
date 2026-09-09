@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import AdminDashboard from './components/AdminDashboard';
+import AdminDashboard from './Pages/AdminDashboard';
 
 const container = document.getElementById('admin-app');
 if (container) {

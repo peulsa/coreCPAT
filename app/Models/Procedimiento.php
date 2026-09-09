@@ -28,7 +28,7 @@ class Procedimiento extends Model
         'url_ley',
         'nivel_digitalizacion',
         'tipo_expediente',
-        'metadatos_tecnicos_y_canales', // Coincide exactamente con el diagrama
+        'metadatos_tecnicos_y_canales',
     ];
 
     protected $casts = [

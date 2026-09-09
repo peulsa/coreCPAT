@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
 import InicioView from './InicioView';
-import GestionPeriodos from './GestionPeriodos';
+import GestionPeriodos from './periodos/GestionPeriodos';
+import Nomina from './nomina/Nomina';
+import Transacciones from './transacciones/Transacciones';
 
 export default function AdminDashboard() {
     const [currentTab, setCurrentTab] = useState('inicio');
@@ -33,6 +35,9 @@ export default function AdminDashboard() {
         return `${dia}/${mes}/${anio} ${horaMin}`;
     };
 
+    // Validamos si la pestaña actual requiere diseño a pantalla completa sin el padding general
+    const esVistaCompleta = currentTab === 'nomina' || currentTab === 'transacciones';
+
     return (
         <div className="min-h-screen bg-gray-100 flex font-sans text-gray-800">
             <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
@@ -40,22 +45,31 @@ export default function AdminDashboard() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header institucionInfo={institucionInfo} />
 
-                <main className="flex-1 p-8 overflow-y-auto">
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                        <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-[#1976d2] font-semibold cursor-pointer" onClick={() => setCurrentTab('inicio')}>Inicio</span>
-                            {currentTab !== 'inicio' && (
-                                <>
-                                    <span className="text-gray-400">▶</span>
-                                    <span className="text-gray-700 font-medium capitalize">
-                                        {currentTab === 'periodos' ? 'Gestión de Períodos' : currentTab}
-                                    </span>
-                                </>
-                            )}
+                <main className={`flex-1 overflow-y-auto ${!esVistaCompleta ? 'p-8' : ''}`}>
+                    
+                    {/* Ocultamos el breadcrumb general para las vistas que traen el suyo propio (Nomina y Transacciones) */}
+                    {!esVistaCompleta && (
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                            <div className="flex items-center space-x-2 text-sm">
+                                <span className="text-[#1976d2] font-semibold cursor-pointer" onClick={() => setCurrentTab('inicio')}>Inicio</span>
+                                {currentTab !== 'inicio' && (
+                                    <>
+                                        <span className="text-gray-400">▶</span>
+                                        <span className="text-gray-700 font-medium capitalize">
+                                            {currentTab === 'periodos' ? 'Gestión de Períodos' : currentTab}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {currentTab === 'periodos' && <GestionPeriodos />}
+                    
+                    {currentTab === 'nomina' && <Nomina />}
+
+                    {/* Renderizado de la nueva vista de Transacciones */}
+                    {currentTab === 'transacciones' && <Transacciones />}
 
                     {currentTab === 'inicio' && (
                         <InicioView 
@@ -67,8 +81,9 @@ export default function AdminDashboard() {
                         />
                     )}
 
-                    {['equipo', 'nomina', 'transacciones', 'reportes', 'recursos', 'ayuda', 'estadisticas'].includes(currentTab) && currentTab !== 'periodos' && (
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                    {/* Se retiró 'transacciones' del array de vistas en construcción */}
+                    {['equipo', 'reportes', 'estadisticas'].includes(currentTab) && currentTab !== 'periodos' && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 m-8">
                             <h2 className="text-2xl font-bold text-[#0a192f] mb-3 capitalize">{currentTab}</h2>
                             <p className="text-sm text-gray-600">Módulo institucional correspondiente al sistema CPAT de la {institucionInfo.municipio}.</p>
                         </div>

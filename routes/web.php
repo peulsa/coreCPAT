@@ -16,11 +16,14 @@ Route::prefix('admin')->group(function () {
         return view('admin');
     });
 
-    // Controlador opcional para procedimientos si lo necesitas aparte
-    Route::get('/procedimientos-data', [AdminProcedimientoController::class, 'index']);
-
-    // Endpoints específicos y de gestión de períodos
+    // Endpoints de la API interna para React
     Route::prefix('api')->group(function () {
+        
+        // CRUD de Procedimientos (Nómina)
+        Route::get('/procedimientos', [AdminProcedimientoController::class, 'index']);
+        Route::post('/procedimientos', [AdminProcedimientoController::class, 'store']);
+
+        // Endpoints de gestión de períodos
         Route::get('/periodo-activo', [AdminPeriodoController::class, 'activo']);
         Route::get('/resumen-ciclos', [AdminPeriodoController::class, 'resumenCiclos']);
         

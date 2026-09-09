@@ -5,8 +5,6 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
         { id: 'nomina', label: 'Nómina de procedimientos y tramitaciones', icon: '📁' },
         { id: 'transacciones', label: 'Transacciones', icon: '📈' },
         { id: 'reportes', label: 'Reportes', icon: '📄' },
-        { id: 'recursos', label: 'Recursos informativos', icon: '🗂️' },
-        { id: 'ayuda', label: 'Ayuda', icon: '❓' },
         { id: 'estadisticas', label: 'Estadísticas', icon: '📊' },
         { id: 'periodos', label: 'Gestión de Períodos', icon: '📅' },
     ];
