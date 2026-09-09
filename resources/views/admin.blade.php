@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoreCPAT - Panel de Administrador</title>
+    
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/admin.jsx'])
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans">
     <div id="admin-app"></div>
 </body>
 </html>
